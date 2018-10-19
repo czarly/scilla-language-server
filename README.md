@@ -43,8 +43,10 @@ The more refined parts of the protocol didn't get much attention as the basics h
 Next steps:
 
  - Changing the default search path for resources to properly bundle standard libraries
- - Using the generated meta model and update it with implicit parameters and fields 
-- Writing tests
+ - Using the generated meta model and update it with implicit parameters and fields
+ - Integrating [**Xsemantics**](https://github.com/eclipse/xsemantics)
+   for type checking including classifying variables as functions or values
+ - Writing tests
 
 This provided the language server will not give the cosy feeling that I would like it to, but the further changes are more of a cosmetic nature, like proper naming of nodes in the outline view or better tooltips with additional information to elements. 
 
