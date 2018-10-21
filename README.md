@@ -6,8 +6,8 @@ A analysis server for the smart contract language Scilla following the **languag
 
 The implementation is based on [**Xtext**](https://www.eclipse.org/Xtext/) which is a Eclipse project for building tool support for DSL. Therefore running the language server and the **Visual Studio Code** plugin requires Java to be installed on the machine. The planned features include what is provided by the **Xtext** language server implementation:
 
- - Syntax Coloring
- - Error Checking
+ - [x] Syntax Coloring 
+ - [x] Error Checking
  - Auto-Completion
  - Formatting
  - Hover Information
