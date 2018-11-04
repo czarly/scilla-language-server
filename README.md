@@ -12,12 +12,12 @@ The implementation is based on [**Xtext**](https://www.eclipse.org/Xtext/) which
  - [ ] Formatting
  - [ ] Hover Information
  - [ ] Mark Occurences
- - [ ] Go To Declaration
+ - [x] Go To Declaration
  - [ ] Rename Refactoring
  - [ ] Toggle Comments
  - [ ] Outline / Structure View
  - [ ] Quick Fix Proposals
- - [ ] Find References
+ - [x] Find References
 
 # Deployment
 
