@@ -8,16 +8,16 @@ The implementation is based on [**Xtext**](https://www.eclipse.org/Xtext/) which
 
  - [x] Syntax Coloring 
  - [x] Error Checking
- - Auto-Completion
- - Formatting
- - Hover Information
- - Mark Occurences
- - Go To Declaration
- - Rename Refactoring
- - Toggle Comments
- - Outline / Structure View
- - Quick Fix Proposals
- - Find References
+ - [x] Auto-Completion
+ - [ ] Formatting
+ - [ ] Hover Information
+ - [ ] Mark Occurences
+ - [ ] Go To Declaration
+ - [ ] Rename Refactoring
+ - [ ] Toggle Comments
+ - [ ] Outline / Structure View
+ - [ ] Quick Fix Proposals
+ - [ ] Find References
 
 # Deployment
 
@@ -42,8 +42,7 @@ The more refined parts of the protocol didn't get much attention as the basics h
 
 Next steps:
 
- - Changing the default search path for resources to properly bundle standard libraries
- - Using the generated meta model and update it with implicit parameters and fields
+ - **Using the generated meta model and update it with implicit parameters and fields**
  - Integrating [**Xsemantics**](https://github.com/eclipse/xsemantics)
    for type checking including classifying variables as functions or values
  - Writing tests
