@@ -32,17 +32,18 @@ Currently a build is provided as a Zip file that can be extracted in your local 
 
 The extension loads and parses the source code using a grammar. It's generating recommendations for auto-completition based on context and can import namespaces whose exports are available to the auto-completition and validator as well.
 
-Currently the imported namespaces have to reside in the same folder next to the source code file to be recognized. Imports of libraries other than the standard libraries are possible in the editor but not allowed by **Scilla** at this point in time.
-
-Static fields that are made implicitly available by the runtime (like _balance) do not validate correctly as they are unknown to the AST. Implicit parameters to transitions are not available to the validator and the auto suggestions in the scope of the transition for the same reason as of yet. 
+The main limitation as of now is that types are not resolved.
 
 # Roadmap
 
-The more refined parts of the protocol didn't get much attention as the basics have to be carved out. Parsing and Scoping works pretty well already and the language server speaks its protocol. 
+The more refined parts of the protocol didn't get much attention as the basics had to be carved out. Parsing and Scoping works pretty well already and the language server speaks its protocol. 
 
 Next steps:
 
- - **Using the generated meta model and update it with implicit parameters and fields**
+ - Formatting
+ - Outline View
+ - Renaming
+ - Limit the autocomplete suggestions to symbols that can be referenced
  - Integrating [**Xsemantics**](https://github.com/eclipse/xsemantics)
    for type checking including classifying variables as functions or values
  - Writing tests
