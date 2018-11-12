@@ -14,7 +14,7 @@ The implementation is based on [**Xtext**](https://www.eclipse.org/Xtext/) which
  - [ ] Mark Occurences
  - [x] Go To Declaration
  - [ ] Rename Refactoring
- - [ ] Toggle Comments
+ - [x] Toggle Comments
  - [ ] Outline / Structure View
  - [ ] Quick Fix Proposals
  - [x] Find References
