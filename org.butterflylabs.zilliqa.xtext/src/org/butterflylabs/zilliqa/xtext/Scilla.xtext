@@ -1,0 +1,506 @@
+grammar org.butterflylabs.zilliqa.xtext.Scilla hidden (WS, SL_COMMENT)
+
+generate scilla "http://www.butterflylabs.org/zilliqa/xtext/Scilla"
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
+/// Structure
+
+Scilla:
+	{Scilla}
+	('import' (imports+=Import)*)?
+	library=Library
+	contract=Contract?
+;
+
+/*Import:
+	"import" {Import} importURI=ID
+;*/
+
+Import:
+	importedNamespace=ID
+;
+
+/*QualifiedNameWithWildcard:
+    QualifiedName '.*'?
+;
+
+QualifiedName:
+    ID ('.' ID)*
+;*/
+
+/*enum LibraryEnum:
+	BOOL="BoolUtils" | LIST="ListUtils" | NAT="NatUtils" | PAIR="PairUtils" | INT="IntUtils"
+;*/
+
+Library:
+	"library" name=ID 
+	(functions+=LibraryFunction)*
+;
+
+Contract:
+	"contract" {Contract} name=ID "(" fields+=ImmutableField ("," fields+=ImmutableField)* ")"
+	body=ContractBody
+;
+
+ImmutableField returns VariableDeclaration:
+	name=ID ":" type=Type
+;
+
+ContractBody:
+	{ContractBody} (fields+=MutableField)* (transitions+=Transition)*
+;
+
+MutableField:
+	"field" name=ID ":" type=Type "=" expression=Expression
+;
+
+Transition:
+	"transition" name=ID "(" (params+=TransitionParameter ("," params+=TransitionParameter)*)? ")" body=TransitionBody "end"
+;
+
+TransitionParameter returns VariableDeclaration:
+	name=ID ":" type=Type
+;
+
+TransitionBody:
+	{TransitionBody}
+	(statements+=Statement 
+	(";" statements+=Statement)*)?
+;
+
+// TODO: decide between functions and constants
+// this is usually assigning a function. but it can assign any simple expression.
+// if it assigns anything but a simple expression, it should be possible to say that 
+// it can't be used as parameter to a constructor. But probably the real deal here 
+// would be a type system that checks the dependencies.
+// this is the let version without any "in" at the end, only allowed to define library functions.
+
+LibraryFunction returns VariableDeclaration:
+	"let" name=ID (":" type=Type)? "=" value=Expression
+;
+
+/*GlobalVariableDeclaration returns VariableDeclaration:
+	name=ID (":" type=Type)? "=" value=SimpleExpression
+;*/
+
+/// Expressions
+
+Expression:
+	SimpleExpression
+	| LocalBinding
+;
+
+SimpleExpression:
+	TypeFunction
+	| Function
+	| BuiltinApplication
+	| TypeApplication
+	| Constructor
+	| EmptyMap
+	| MessageExpression
+	| MatchExpression
+	| Term
+;
+
+LocalBinding:
+	"let" variable=LocalVariableDeclaration "in" body=Expression
+;
+
+LocalVariableDeclaration returns VariableDeclaration:
+	name=ID (":" type=Type)? "=" value=SimpleExpression 
+;
+
+TypeFunction:
+	"tfun" variable=TypeFunctionParameter "=>" body=Expression
+;
+
+TypeFunctionParameter returns TypeVariableDeclaration:
+	name=TYPEVARID
+;
+
+Function:
+	"fun" "(" variable=FunctionParameter? ")" "=>" body=Expression
+;
+
+FunctionParameter returns VariableDeclaration:
+	name=ID ":" type=Type
+;
+
+
+// TODO: Type Functions have a assigment to a variable somewhere that should be called here
+// i guess its dependend on the type of the variable what we can do with it.
+// so that we can also pass this to a function and apply a type to the function argument
+// within that function
+
+TypeApplication:
+	"@" {TypeApplication} function=SymbolRef (parameters+=Type)*   
+;
+
+BuiltinApplication:
+	{BuiltinApplication} function=BuiltinFunctionEnum (parameters+=SymbolRef)*
+;
+
+MessageExpression:
+	"{" assignments+=IdentifierAssignment (";" assignments+=IdentifierAssignment)* "}"
+;
+
+IdentifierAssignment:
+	GeneralAssignment
+;
+
+GeneralAssignment:
+	name=ID ":" value=AssignmentValue
+;
+
+AssignmentValue:
+	Literal
+	| SymbolRef
+;
+
+MatchExpression:
+	"match" variable=SymbolRef "with"
+	("|" selectors+=MatchExpressionSelector)*
+	"end"
+;
+
+MatchExpressionSelector:
+	pattern=PatternConstructor "=>" (expression=Expression)?
+;
+
+PatternConstructor:
+	Pair
+	| Some
+	| Cons
+	| Succ
+	| PatternConstructorTerminal
+;
+
+Pair:
+	"Pair" key=PatternConstructorTerminal value=PatternConstructorTerminal
+;
+
+Cons:
+	"Cons" head=PatternConstructorTerminal tail=PatternConstructorTerminal
+;
+
+// TODO: Maybe this needs to be more generalized? donno
+Succ:
+	"Succ" pred=PatternVariable
+;
+
+Some:
+	"Some" parameter=PatternConstructorTerminal
+;
+
+PatternConstructorTerminal returns PatternConstructor:
+	"(" PatternConstructor ")"
+	| PatternVariable
+	| "None" {None}
+	| "List" {List}
+	| "Nil" {EmptyList}
+	| "False" {False}
+	| "True" {True}
+	| "Zero"
+	| "_" {Any} 
+;
+
+PatternVariable returns VariableDeclaration:
+	name=ID
+;
+
+/*ConstructorParam:
+	ConstructorParamTerminal (=>({Constructor.name=current} parameters+=ConstructorParam (parameters+=ConstructorParam)*)?)
+;
+
+ConstructorParamTerminal returns ConstructorParam:
+	"(" ConstructorParam ")"
+	| Variable
+;*/
+
+
+// get some constructors for datatypes
+// make sure you can matroska them
+
+Constructor:
+	//name=ConstructorEnum ("{" type=Type "}")? (parameters+=Variable)*
+	NewList
+	| NewPair
+	| NewOption
+	| NewBool
+	| NewNat
+;
+
+NewNat:
+	"Zero"
+	| "Succ" value=SymbolRef
+;
+
+NewBool:
+	"True" 
+	| "False"
+;
+
+NewOption:
+	"Some" "{" type=Type "}" value=SymbolRef 
+	| "None" "{" type=Type "}"
+;
+
+NewList:
+	"Nil" {NewList} "{" type=Type "}"
+	| "Cons" {NewList} "{" type=Type "}" head=SymbolRef tail=SymbolRef
+;
+
+// TODO: require a pair type as we always need key -> value
+NewPair:
+	"Pair" {NewPair} "{" left=Type right=Type "}" key=SymbolRef value=SymbolRef
+;
+
+
+// This one should be a constructor but it doesn't fit the format Emp {Type Type} 
+// thats because it isn't a constructor really. 
+// Map is also no DataType
+
+EmptyMap:
+	"Emp" key=Type value=Type
+;
+
+Term: 
+	Application
+;
+
+Application returns Term:	
+	TerminalTerm (=>({Application.fun=current} arg=TerminalTerm)*)
+;
+
+TerminalTerm returns Term:
+    '(' Term ')' |
+    Literal |
+    VariableTerm 
+;
+
+VariableTerm:
+	variable=SymbolRef
+;
+
+Variable:
+	name=ID
+;
+
+
+/// Statements
+
+Statement:
+	MatchStatement
+	| TerminalStatement
+;
+
+TerminalStatement:
+	Assignment
+	| ReadStatement
+	| BlockchainReadStatement
+	| StoreStatement
+	| AcceptStatement
+	| SendStatement
+	| EventStatement
+;
+
+Assignment returns VariableDeclaration:
+	name=ID "=" right=Expression
+;
+
+// balance can be mutated only be a send transaction so in effect it can not be altered with store, only read
+// _balance as of now is the only implicit field and available globally
+ReadStatement returns VariableDeclaration:
+	name=ID "<-" (field=MutableFieldRef | "_balance")
+;
+
+MutableFieldRef:
+	field=[MutableField] ("[" keys+=MutableFieldKey "]")*
+;
+
+MutableFieldKey:
+	SymbolRef
+	|{MutableFieldKey} STRING
+;
+
+BlockchainReadStatement returns VariableDeclaration:
+	name=ID "<-" "&" "BLOCKNUMBER"
+;
+
+StoreStatement:
+	field=MutableFieldRef ":=" value=SymbolRef
+;
+
+AcceptStatement:
+	{AcceptStatement} "accept"	
+;
+
+EventStatement:
+	"event" {EventStatement} message=SymbolRef
+;
+
+SendStatement:
+	"send" {SendStatement} messages=SymbolRef
+;
+
+MatchStatement:
+	"match" variable=SymbolRef "with"
+	("|" selectors+=MatchStatementSelector)*
+	"end"
+;
+
+MatchStatementSelector:
+	pattern=PatternConstructor "=>" (statements+=Statement (";" statements+=Statement)*)?
+;
+
+/// References
+
+SymbolRef:
+	symbol=[VariableDeclaration|ID]
+;
+
+/// Literal
+
+Literal:
+	//SpecialVariables |
+    //BooleanConst |
+    Number |
+    StringLiteral
+;
+
+Number:
+    NumberDimensionless
+;
+
+NumberDimensionless:
+	(type=IntegerTypeEnum)?
+    value=INT
+;
+
+StringLiteral:
+    value=STRING
+;
+
+ElementaryType:
+	IntegerType | OtherType
+;
+
+MapKeyType:
+	ElementaryType | "(" ElementaryType ")"
+;
+
+IntegerType:
+	type=IntegerTypeEnum
+;
+
+OtherType:
+	type=ElementaryTypeEnum
+;
+
+/// Type
+Type:
+	FunctionType
+;
+
+FunctionType returns Type: 
+	TerminalType (=>(ARROW {ArrowType.left=current} right=TerminalType)*)
+;
+
+TerminalType returns Type:
+	'(' Type ')' 
+	| MessageType // can only stay here because the next rule is only disabled for input "Message" trough this rule
+	| ElementaryType
+	| TypeVariable
+	| MapType
+	| DataType
+;
+
+MapType:
+	"Map" key=Type value=Type
+;
+
+MessageType:
+	"Message"
+;
+
+// TODO: actually references a TypeVariableDeclaration
+TypeVariable:
+	symbol=[TypeVariableDeclaration|TYPEVARID]
+;
+
+DataType:
+	"Bool"
+	| "Nat"
+	| "List" parameter=Type 
+	| "Option" parameter=Type
+	| "Pair" left=Type right=Type
+;
+
+/*DataTypeEnum:
+	LIST="List" | SOME="Some" | NONE="None" | OPTION="Option"
+;*/
+
+/// Enums
+
+enum IntegerTypeEnum:
+	UINT32="Uint32" | UINT64="Uint64" | UINT128="Uint128" | UINT256="Uint256" | INT64="Int64" | INT32="Int32" | INT128="Int128" | INT256="Int256"
+;
+
+enum ElementaryTypeEnum:
+	MSG="Message" | STRING="String" | HASH="ByStr32" | ADDRESS="ByStr20" | BNUM="BNum" | PUBKEY="ByStr33"
+;
+
+// todo: replace with actual special variables    
+/*enum SpecialVariablesTypeEnum:
+	MSG="msg"|BLOCK="block"|TX="tx"
+;*/    
+   
+enum BuiltinFunctionEnum:
+	ADD="builtin add" 
+	| EQ="builtin eq" // Int, String, Hash, Address, BNum
+	| GET="builtin get" // Map
+	| PUT="builtin put" // Map
+	| REMOVE="builtin remove" // Map
+	| CONTAINS="builtin contains" // Map
+	| TOLIST="builtin to_list" // Map
+	| SUB="builtin sub" 
+	| MUL="builtin mul" 
+	| LT="builtin lt" 
+	| CONCAT="builtin concat" // String 
+	| SUBSTR="builtin substr" // String
+	| DIST="builtin dist" // Hash
+	| SHA256="builtin sha256hash" // Any
+	| BLT="builtin blt" // BNum
+	| BADD="builtin badd" // BNum
+	| TONAT="builtin to_nat" // Uint32
+	| TOUINT32="builtin to_uint32"
+	| TOINT32="builtin to_int32"
+	| TOINT64="builtin to_int64"
+	| TOINT128="builtin to_int128"
+	| TOINT256="builtin to_int256"
+	| TOBYSTR="builtin to_bystr"
+	| SCHNORRGEKEYPAIR="builtin schnorr_gen_key_pair"
+	| SCHNORRSIGN="builtin schnorr_sign"
+	| SCHNORRVERIFY="builtin schnorr_verify"
+	| DIV="builtin div"
+	| REM="builtin rem"
+	
+;   
+    
+/// buildins
+
+terminal ID: '^'?('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+terminal TYPEVARID: "'" ID;
+terminal INT returns ecore::EInt: ('0'..'9')+;
+terminal STRING:
+			'"' ( '\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\'|'"') )* '"' 
+			//| "'" ( '\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\'|"'") )* "'"
+		;
+terminal SL_COMMENT	: '(*' !('\n'|'\r')* '*)';
+// terminal SL_COMMENT : '//' !('\n'|'\r')* ('\r'? '\n')?;
+
+terminal ARROW: "->";
+
+terminal WS         : (' '|'\t'|'\r'|'\n')+;
+
+terminal ANY_OTHER: .;
