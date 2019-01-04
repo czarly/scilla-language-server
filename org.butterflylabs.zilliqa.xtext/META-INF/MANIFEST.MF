@@ -26,5 +26,6 @@ Export-Package: org.butterflylabs.zilliqa.xtext.scilla.impl,
  org.butterflylabs.zilliqa.xtext.services,
  org.butterflylabs.zilliqa.xtext,
  org.butterflylabs.zilliqa.xtext.parser.antlr.internal,
- org.butterflylabs.zilliqa.xtext.scilla
+ org.butterflylabs.zilliqa.xtext.scilla,
+ org.butterflylabs.zilliqa.xtext.formatting2
 Import-Package: org.apache.log4j
