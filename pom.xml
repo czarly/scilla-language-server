@@ -28,7 +28,7 @@
 		<module>org.butterflylabs.zilliqa.xtext.feature</module>
 		<module>org.butterflylabs.zilliqa.xtext.repository</module>
 		<module>org.butterflylabs.zilliqa.xtext.tests</module>
-		<module>org.butterflylabs.zilliqa.xtext.ui.tests</module>
+		<!--<module>org.butterflylabs.zilliqa.xtext.ui.tests</module>-->
 	</modules>
 	<build>
 		<plugins>
