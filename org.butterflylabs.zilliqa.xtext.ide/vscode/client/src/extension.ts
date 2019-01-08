@@ -5,7 +5,7 @@
 'use strict';
 
 import * as path from 'path';
-import * as net from 'net';
+//import * as net from 'net';
 
 import {Trace} from 'vscode-jsonrpc';
 import { commands, window, workspace, ExtensionContext, Uri} from 'vscode';
@@ -13,9 +13,9 @@ import { commands, window, workspace, ExtensionContext, Uri} from 'vscode';
 import {
 	LanguageClient,
 	LanguageClientOptions,
-	StreamInfo,
+	//StreamInfo,
 	ServerOptions,
-	TransportKind
+	//TransportKind
 } from 'vscode-languageclient';
 
 let lc: LanguageClient;

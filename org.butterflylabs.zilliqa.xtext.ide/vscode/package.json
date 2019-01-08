@@ -1,20 +1,20 @@
 {
-	"name": "lsp-sample",
-	"description": "A language server example",
+	"name": "scilla-vscode-extension",
+	"description": "A Scilla mode for VSCode",
 	"author": "Microsoft Corporation",
 	"license": "MIT",
 	"version": "1.0.0",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-extension-samples"
+		"url": "https://github.com/czarly/scilla-language-server"
 	},
-	"publisher": "vscode",
+	"publisher": "czarly",
 	"categories": [],
 	"keywords": [
 		"multi-root ready"
 	],
 	"engines": {
-		"vscode": "^1.23.0"
+		"vscode": "^1.30.1"
 	},
 	"activationEvents": [
 		"onLanguage:scilla",
@@ -70,7 +70,7 @@
 		"vscode:prepublish": "cd client && npm run update-vscode && cd .. && npm run compile",
 		"compile:client": "tsc -p ./client/tsconfig.json",
 		"watch:client": "tsc -w -p ./client/tsconfig.json",
-		"compile": "npm run compile:client && npm run compile:server",
+		"compile": "npm run compile:client",
 		"postinstall": "cd client && npm install && cd ..",
 		"test": "sh ./scripts/e2e.sh"
 	},
@@ -78,5 +78,8 @@
 		"@types/mocha": "^5.2.0",
 		"@types/node": "^8.0.0",
 		"typescript": "2.8.3"
+	},
+	"dependencies": {
+		"vsce": "^1.54.0"
 	}
 }

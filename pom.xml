@@ -22,11 +22,11 @@
 	<modules>
 		<module>org.butterflylabs.zilliqa.xtext</module>
 		<module>org.butterflylabs.zilliqa.xtext.ide</module>
-		<module>org.butterflylabs.zilliqa.xtext.ui</module>
-		<module>org.butterflylabs.zilliqa.xtext.web</module>
+		<!-- module>org.butterflylabs.zilliqa.xtext.ui</module -->
+		<!-- module>org.butterflylabs.zilliqa.xtext.web</module -->
 		<module>org.butterflylabs.zilliqa.xtext.target</module>
-		<module>org.butterflylabs.zilliqa.xtext.feature</module>
-		<module>org.butterflylabs.zilliqa.xtext.repository</module>
+		<!-- module>org.butterflylabs.zilliqa.xtext.feature</module -->
+		<!-- module>org.butterflylabs.zilliqa.xtext.repository</module -->
 		<module>org.butterflylabs.zilliqa.xtext.tests</module>
 		<!--<module>org.butterflylabs.zilliqa.xtext.ui.tests</module>-->
 	</modules>
