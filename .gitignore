@@ -181,3 +181,7 @@ xtend-gen/
 ### project specific
 
 **/org.butterflylabs.zilliqa.xtext.ide-1.0.0-SNAPSHOT-ls.jar
+
+org.butterflylabs.zilliqa.xtext.ide/vscode/client/package-lock.json
+org.butterflylabs.zilliqa.xtext.ide/vscode/package-lock.json
+org.butterflylabs.zilliqa.xtext.ide/vscode/scilla-vscode-extension-1.0.0.vsix

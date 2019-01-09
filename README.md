@@ -30,8 +30,9 @@ docker run -it --rm --name build-scilla-language-server -v "$(pwd)":/usr/src/sci
 cd org.butterflylabs.zilliqa.xtext.ide/vscode
 npm install vsce
 npm install -g vsce
+npm install
 vsce package
-code --install-extension  org.butterflylabs.zilliqa.xtext.ide/vscode/scilla-vscode-extension-1.0.0.vsix
+code --install-extension  scilla-vscode-extension-1.0.0.vsix
 ```
 
 This will compile and install the ***Visual Studio Code*** extension contained in this repository to your local installation.
