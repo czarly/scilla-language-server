@@ -14,7 +14,7 @@ You can find the repository and the build instructions in the **Github**
 [repsitory](https://github.com/czarly/scilla-language-server)
 
 You can download the latest build for inclusion as a plugin
-[here](/builds/scilla-vscode-extension-1.0.0.vsix)
+[here](/scilla-language-server/builds/scilla-vscode-extension-1.0.0.vsix)
 
 to install it to your local **Visual Studio Code** you can open a
 terminal and run the following command with the right path to your downlad.
