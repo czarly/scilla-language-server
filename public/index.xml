@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Scilla Language Server</title>
-    <link>http://example.org/</link>
+    <link>https://czarly.github.io/scilla-language-server/</link>
     <description>Recent content on Scilla Language Server</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 09 Jan 2019 13:56:23 +0700</lastBuildDate>
     
-	<atom:link href="http://example.org/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://czarly.github.io/scilla-language-server/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Hello Community</title>
-      <link>http://example.org/posts/hello-community/</link>
+      <link>https://czarly.github.io/scilla-language-server/posts/hello-community/</link>
       <pubDate>Wed, 09 Jan 2019 13:56:23 +0700</pubDate>
       
-      <guid>http://example.org/posts/hello-community/</guid>
+      <guid>https://czarly.github.io/scilla-language-server/posts/hello-community/</guid>
       <description>First public build As Zilliqa is going live soon, I decided to brush up the build scripts and the repository structure to allow anyone to participate in the development of the language server for the Scilla programming language which is the language in which Zilliqa smart contracts are deployed.
 You can find the repository and the build instructions in the Github repsitory
 You can download the latest build for inclusion as a plugin here</description>

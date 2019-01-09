@@ -3,29 +3,29 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>http://example.org/posts/hello-community/</loc>
+    <loc>https://czarly.github.io/scilla-language-server/posts/hello-community/</loc>
     <lastmod>2019-01-09T13:56:23+07:00</lastmod>
   </url>
   
   <url>
-    <loc>http://example.org/categories/</loc>
+    <loc>https://czarly.github.io/scilla-language-server/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/posts/</loc>
-    <lastmod>2019-01-09T13:56:23+07:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://example.org/</loc>
+    <loc>https://czarly.github.io/scilla-language-server/posts/</loc>
     <lastmod>2019-01-09T13:56:23+07:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/tags/</loc>
+    <loc>https://czarly.github.io/scilla-language-server/</loc>
+    <lastmod>2019-01-09T13:56:23+07:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://czarly.github.io/scilla-language-server/tags/</loc>
     <priority>0</priority>
   </url>
   
