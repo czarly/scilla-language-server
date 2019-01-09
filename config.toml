@@ -1,4 +1,0 @@
-baseURL = "https://czarly.github.io/scilla-language-server/"
-languageCode = "en-us"
-title = "Scilla Language Server"
-theme = "ananke"
