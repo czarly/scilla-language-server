@@ -4,3 +4,5 @@ hide_body: false
 is_partial: false
 fields:
 - type: text
+pages:
+- content/posts/forestry.md
