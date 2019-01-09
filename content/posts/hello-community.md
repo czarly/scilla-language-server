@@ -3,7 +3,7 @@ title: "Hello Community"
 date: 2019-01-09T13:56:23+07:00
 draft: false
 ---
-# First public build
+# The journey begins
 
 As **Zilliqa** is going live soon, I decided to brush up the build scripts
 and the repository structure to allow anyone to participate in the
