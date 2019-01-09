@@ -1,0 +1,264 @@
+import org.butterflylabs.zilliqa.xtext.scilla.AddressType
+import org.butterflylabs.zilliqa.xtext.scilla.ArrowType
+import org.butterflylabs.zilliqa.xtext.scilla.BNumType
+import org.butterflylabs.zilliqa.xtext.scilla.BoolType
+import org.butterflylabs.zilliqa.xtext.scilla.ComplexType
+import org.butterflylabs.zilliqa.xtext.scilla.ElementaryType
+import org.butterflylabs.zilliqa.xtext.scilla.HashType
+import org.butterflylabs.zilliqa.xtext.scilla.Int128Type
+import org.butterflylabs.zilliqa.xtext.scilla.Int256Type
+import org.butterflylabs.zilliqa.xtext.scilla.Int32Type
+import org.butterflylabs.zilliqa.xtext.scilla.Int64Type
+import org.butterflylabs.zilliqa.xtext.scilla.ListType
+import org.butterflylabs.zilliqa.xtext.scilla.MapType
+import org.butterflylabs.zilliqa.xtext.scilla.MessageType
+import org.butterflylabs.zilliqa.xtext.scilla.NatType
+import org.butterflylabs.zilliqa.xtext.scilla.OptionType
+import org.butterflylabs.zilliqa.xtext.scilla.PairType
+import org.butterflylabs.zilliqa.xtext.scilla.PubKeyType
+import org.butterflylabs.zilliqa.xtext.scilla.StringType
+import org.butterflylabs.zilliqa.xtext.scilla.Term
+import org.butterflylabs.zilliqa.xtext.scilla.Type
+import org.butterflylabs.zilliqa.xtext.scilla.TypeVariable
+import org.butterflylabs.zilliqa.xtext.scilla.Uint128Type
+import org.butterflylabs.zilliqa.xtext.scilla.Uint256Type
+import org.butterflylabs.zilliqa.xtext.scilla.Uint32Type
+import org.butterflylabs.zilliqa.xtext.scilla.Uint64Type
+import org.butterflylabs.zilliqa.xtext.scilla.VariableDeclaration
+import org.butterflylabs.zilliqa.xtext.xsemantics.LambdaUtils
+import org.butterflylabs.zilliqa.xtext.xsemantics.TypeSubstitutions
+import org.eclipse.emf.ecore.util.EcoreUtil
+
+system org.butterflylabs.zilliqa.xsemantics.ScillaSystem
+
+//validatorExtends org.eclipse.xsemantics.example.lambda.validation.AbstractLambdaJavaValidator
+
+inject LambdaUtils lambdaUtils
+
+auxiliary {
+    notoccur(Type type, Type other)
+        error stringRep(type) + " occurs in " + stringRep(other)
+    typesubstitution(TypeSubstitutions substitutions, Type original) : Type
+    unify(TypeSubstitutions substitutions, 
+            Type left, Type right) : Type
+        error "cannot unify " + stringRep(left) + 
+            " with " + stringRep(right)
+}
+
+judgments {
+    type |- TypeSubstitutions substitutions |> Term term : output Type
+    paramtype |~ VariableDeclaration param : output Type
+}
+
+// notoccur
+
+auxiliary notoccur(Type type, Type other) { true }
+
+auxiliary notoccur(TypeVariable variable, TypeVariable other)
+{
+    variable.symbol.name != other.symbol.name
+}
+
+auxiliary notoccur(TypeVariable variable, ArrowType arrowType)
+{
+    notoccur(variable, arrowType.left)
+    notoccur(variable, arrowType.right)
+}
+
+auxiliary notoccur(TypeVariable variable, ListType listType)
+{
+    notoccur(variable, listType.parameter)
+}
+
+auxiliary notoccur(TypeVariable variable, OptionType optionType)
+{
+    notoccur(variable, optionType.parameter)
+}
+
+auxiliary notoccur(TypeVariable variable, PairType pairType)
+{
+    notoccur(variable, pairType.leftType)
+   	notoccur(variable, pairType.rightType)
+}
+
+auxiliary notoccur(TypeVariable variable, MapType mapType)
+{
+    notoccur(variable, mapType.keyType)
+   	notoccur(variable, mapType.valueType)
+}
+
+//// substitutions
+
+auxiliary typesubstitution(TypeSubstitutions substitutions, Type type)
+{
+    type
+}
+
+auxiliary typesubstitution(TypeSubstitutions substitutions, TypeVariable variable)
+{
+    var mapped = substitutions.mapped(variable.symbol.name)
+    if (mapped !== null) {
+        val result = EcoreUtil::copy(mapped)
+        typesubstitution(substitutions, result) // recursive
+    } else
+        variable
+}
+
+auxiliary typesubstitution(TypeSubstitutions substitutions, ArrowType arrowType)
+{
+    var Type subResult
+    val result = EcoreUtil::copy(arrowType)
+    subResult = typesubstitution(substitutions, arrowType.left)
+    result.left = subResult
+    subResult = typesubstitution(substitutions, arrowType.right)
+    result.right = subResult
+    result
+}
+
+auxiliary typesubstitution(TypeSubstitutions substitutions, ListType listType)
+{
+    var Type subResult
+    val result = EcoreUtil::copy(listType)
+    subResult = typesubstitution(substitutions, listType.parameter)
+    result.parameter = subResult
+    result
+}
+
+auxiliary typesubstitution(TypeSubstitutions substitutions, OptionType optionType)
+{
+    var Type subResult
+    val result = EcoreUtil::copy(optionType)
+    subResult = typesubstitution(substitutions, optionType.parameter)
+    result.parameter = subResult
+    result
+}
+
+auxiliary typesubstitution(TypeSubstitutions substitutions, PairType pairType)
+{
+    var Type subResult
+    val result = EcoreUtil::copy(pairType)
+    subResult = typesubstitution(substitutions, pairType.leftType)
+    result.leftType = subResult
+    subResult = typesubstitution(substitutions, pairType.rightType)
+    result.rightType = subResult
+    result
+}
+
+auxiliary typesubstitution(TypeSubstitutions substitutions, MapType mapType)
+{
+    var Type subResult
+    val result = EcoreUtil::copy(mapType)
+    subResult = typesubstitution(substitutions, mapType.keyType)
+    result.keyType = subResult
+    subResult = typesubstitution(substitutions, mapType.valueType)
+    result.valueType = subResult
+    result
+}
+
+// unify elementary types with themselves
+
+auxiliary unify(TypeSubstitutions substitutions, Type t1, Type t2) {
+    // if we get here we cannot unify the two types
+    fail
+    null
+} 
+
+auxiliary unify(TypeSubstitutions substitutions, StringType t1, StringType t2) 
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, MessageType t1, MessageType t2) 
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, NatType t1, NatType t2) 
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, HashType t1, HashType t2) 
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, AddressType t1, AddressType t2) 
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, BNumType t1, BNumType t2) 
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, PubKeyType t1, PubKeyType t2) 
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, BoolType t1, BoolType t2) 
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, Int32Type t1, Int32Type t2)
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, Int64Type t1, Int64Type t2)
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, Int128Type t1, Int128Type t2)
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, Int256Type t1, Int256Type t2)
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, Uint32Type t1, Uint32Type t2)
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, Uint64Type t1, Uint64Type t2)
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, Uint128Type t1, Uint128Type t2)
+{
+    EcoreUtil.copy(t1)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, Uint256Type t1, Uint256Type t2)
+{
+    EcoreUtil.copy(t1)
+}
+
+// unify type variables with whatever type you feed them
+
+auxiliary unify(TypeSubstitutions substitutions, TypeVariable typeVar, ElementaryType elementaryType)
+{
+    substitutions.add(typeVar.symbol.name, elementaryType)
+    EcoreUtil.copy(elementaryType)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, ElementaryType elementaryType, TypeVariable typeVar)
+{
+    unify(substitutions, typeVar, elementaryType)
+}
+
+// this should be okay in any case because its a fresh type variable anyway.
+auxiliary unify(TypeSubstitutions substitutions, ComplexType complexType, TypeVariable typeVar)
+{
+    unify(substitutions, typeVar, complexType)
+}
+
