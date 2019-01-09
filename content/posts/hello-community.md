@@ -1,7 +1,7 @@
 ---
 title: "Hello Community"
 date: 2019-01-09T13:56:23+07:00
-draft: true
+draft: false
 ---
 # First public build
 
