@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>fileTypes</key>
+	<array>
+		<string>*.scilla</string>
+	</array>
+	<key>name</key>
+	<string>scilla</string>
+	<key>patterns</key>
+	<array>
+		<dict>
+			<key>name</key>
+			<string>keyword.control.scilla</string>
+			<key>match</key>
+			<string>\b(BLOCKNUMBER|BNum|BoolUtils|ByStr20|ByStr32|Cons|Emp|False|Int128|Int32|Int64|IntUtils|List|ListUtils|Map|Message|NatUtils|Nil|None|Option|Pair|PairUtils|Some|String|To_list|True|Uint128|Uint256|Uint32|Uint64|_|_tag|accept|add|badd|blt|builtin|concat|contains|contract|dist|end|eq|event|false|field|fun|get|import|in|let|library|lt|match|mul|put|remove|send|sha256hash|sub|substr|tfun|transition|true|with)\b</string>
+		</dict>
+	</array>
+	<key>scopeName</key>
+	<string>text.scilla</string>
+</dict>
+</plist>
