@@ -7,8 +7,9 @@
 # website: https://gohugo.io
 
 # generated files by hugo
-/public/
-/resources/_gen/
+# /public/
+# /resources/_gen/
+## note: this has to be in git but you should not run hugo on your local development site as it gets build by forestry
 
 # executable may be added to repository
 hugo.exe
