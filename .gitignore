@@ -1,0 +1,33 @@
+# Created by https://www.gitignore.io/api/hugo
+# Edit at https://www.gitignore.io/?templates=hugo
+
+### Hugo ###
+### Hugo ###
+# gitginore template for Hugo projects
+# website: https://gohugo.io
+
+# generated files by hugo
+/public/
+/resources/_gen/
+
+# executable may be added to repository
+hugo.exe
+hugo.darwin
+hugo.linux
+
+# End of https://www.gitignore.io/api/hugo
+
+## project (and branch) specific
+
+.DS_Store
+.project
+.settings
+/org.butterflylabs.zilliqa.xtext/
+/org.butterflylabs.zilliqa.xtext.feature/
+/org.butterflylabs.zilliqa.xtext.ide/
+/org.butterflylabs.zilliqa.xtext.repository/
+/org.butterflylabs.zilliqa.xtext.target/
+/org.butterflylabs.zilliqa.xtext.tests/
+/org.butterflylabs.zilliqa.xtext.ui/
+/org.butterflylabs.zilliqa.xtext.ui.tests/
+/org.butterflylabs.zilliqa.xtext.web/
