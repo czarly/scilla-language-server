@@ -9,7 +9,7 @@ Scilla:
 	{Scilla}
 	('scilla_version' version=INT)?
 	('import' (imports+=Import)*)?
-	library=Library
+	library=Library?
 	contract=Contract?
 ;
 
@@ -39,7 +39,7 @@ Library:
 ;
 
 Contract:
-	"contract" {Contract} name=ID "(" fields+=ImmutableField ("," fields+=ImmutableField)* ")"
+	"contract" {Contract} name=ID "(" (fields+=ImmutableField ("," fields+=ImmutableField)*)? ")"
 	body=ContractBody
 ;
 
@@ -299,8 +299,10 @@ Statement:
 TerminalStatement:
 	Assignment
 	| ReadStatement
+	| ExistsStatement
 	| BlockchainReadStatement
 	| StoreStatement
+	| DeleteStatement
 	| AcceptStatement
 	| SendStatement
 	| EventStatement
@@ -314,6 +316,14 @@ Assignment returns VariableDeclaration:
 // _balance as of now is the only implicit field and available globally
 ReadStatement returns VariableDeclaration:
 	name=ID "<-" (field=MutableFieldRef | "_balance")
+;
+
+// this feels clumsy. eventually the right side of the assigment should become some kind of statement 
+// instead of hardcoding every possible function. but then, its a buildin function so it might also be
+// just hardcoded.
+
+ExistsStatement returns VariableDeclaration:
+	name=ID "<-" "exists" field=MutableFieldRef
 ;
 
 MutableFieldRef:
@@ -332,6 +342,10 @@ BlockchainReadStatement returns VariableDeclaration:
 
 StoreStatement:
 	field=MutableFieldRef ":=" value=SymbolRef
+;
+
+DeleteStatement:
+	"delete" field=MutableFieldRef
 ;
 
 AcceptStatement:
@@ -376,7 +390,9 @@ Int256Type: {Int256Type} "Int256";
 
 MessageType: {MessageType} "Message";
 StringType: {StringType} "String";
+HexType: {HeyType} "ByStr";
 HashType: {HashType} "ByStr32";
+ByStr64: {ByStr64} "ByStr64";
 AddressType: {AddressType} "ByStr20";
 BNumType: {BNumType} "BNum";
 PubKeyType: {PubKeyType} "ByStr33";
@@ -412,7 +428,9 @@ IntegerType:
 OtherType:
 	MessageType 
 	| StringType
+	| HexType
 	| HashType
+	| ByStr64
 	| AddressType
 	| BNumType
 	| PubKeyType
@@ -449,12 +467,12 @@ TypeVariable:
 /// Literal
 
 Literal:
-    Number |
-    StringLiteral |
+    BlockNumberConstant |
     AddressConstant |
     HashConstant |
-    BlockNumberConstant |
-    BoolConstant
+    BoolConstant |
+    Number |
+    StringLiteral
 ;
 
 Number:
@@ -518,15 +536,17 @@ enum BuiltinFunctionEnum:
 	| SCHNORRVERIFY="builtin schnorr_verify"
 	| DIV="builtin div"
 	| REM="builtin rem"
+	| SIZE="builtin size"
+	| ECDSAVERIFY="builtin ecdsa_verify"
 	
 ;   
     
 /// buildins
 
-terminal INT returns ecore::EInt: ('0'..'9')+;
-terminal BOOL: "true" | "false";
+terminal INT returns ecore::EInt: ('-')?('0'..'9')+;
+terminal BOOL: "True" | "False";
 terminal CHAR: ('a'..'z'|'A'..'Z'|'0'..'9');
-terminal BNUM: 'block' INT;
+terminal BNUM: 'block' (' ')* INT;
 // 64 chars, bystr32
 terminal HASH: '0x' CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR;
 // 40 chars, bystr20 

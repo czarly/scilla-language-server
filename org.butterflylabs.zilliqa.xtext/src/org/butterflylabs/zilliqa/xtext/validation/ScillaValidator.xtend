@@ -53,14 +53,14 @@ class ScillaValidator extends AbstractScillaValidator {
     	checkForTransitionField(reference, "_recipient")    
     }
         
-    @Check
+    /* @Check
     def void checkForDeclaredOwner(Contract contract) {
     	val hasOwner = contract.fields.filter[field | field.name == "owner"].size() > 0
     	    	
         if(!hasOwner){
         	error("The contract needs to declare a owner field", ScillaPackage.Literals.CONTRACT__NAME)
         }
-    }
+    }*/
     
     @Check
     def void checkForLibraryImport(Import imp) {

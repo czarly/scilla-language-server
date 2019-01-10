@@ -10,9 +10,9 @@ let _accepted : Int128 = Int128 1
 let _eventname : Int128 = Int128 1 
 
 (** global fields **)
-let _creation_block : Int128 = Int128 1 
-
+let _this_address : ByStr20 = 0x0000000000000000000000000000000000000000
+let _creation_block : BNum = block 0
 
 let list_foldr : Bool = True
 let list_foldl : Bool = False
-let nat_fold : Bool False
+let nat_fold : Bool = False 
