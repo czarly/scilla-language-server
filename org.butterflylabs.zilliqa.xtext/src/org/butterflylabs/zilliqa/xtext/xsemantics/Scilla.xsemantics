@@ -1,9 +1,14 @@
+import org.butterflylabs.zilliqa.xtext.scilla.AddressConstant
 import org.butterflylabs.zilliqa.xtext.scilla.AddressType
 import org.butterflylabs.zilliqa.xtext.scilla.ArrowType
 import org.butterflylabs.zilliqa.xtext.scilla.BNumType
+import org.butterflylabs.zilliqa.xtext.scilla.BlockNumberConstant
+import org.butterflylabs.zilliqa.xtext.scilla.BoolConstant
 import org.butterflylabs.zilliqa.xtext.scilla.BoolType
 import org.butterflylabs.zilliqa.xtext.scilla.ComplexType
 import org.butterflylabs.zilliqa.xtext.scilla.ElementaryType
+import org.butterflylabs.zilliqa.xtext.scilla.FunctionParameter
+import org.butterflylabs.zilliqa.xtext.scilla.HashConstant
 import org.butterflylabs.zilliqa.xtext.scilla.HashType
 import org.butterflylabs.zilliqa.xtext.scilla.Int128Type
 import org.butterflylabs.zilliqa.xtext.scilla.Int256Type
@@ -13,9 +18,11 @@ import org.butterflylabs.zilliqa.xtext.scilla.ListType
 import org.butterflylabs.zilliqa.xtext.scilla.MapType
 import org.butterflylabs.zilliqa.xtext.scilla.MessageType
 import org.butterflylabs.zilliqa.xtext.scilla.NatType
+import org.butterflylabs.zilliqa.xtext.scilla.NumberDimensionless
 import org.butterflylabs.zilliqa.xtext.scilla.OptionType
 import org.butterflylabs.zilliqa.xtext.scilla.PairType
 import org.butterflylabs.zilliqa.xtext.scilla.PubKeyType
+import org.butterflylabs.zilliqa.xtext.scilla.StringLiteral
 import org.butterflylabs.zilliqa.xtext.scilla.StringType
 import org.butterflylabs.zilliqa.xtext.scilla.Term
 import org.butterflylabs.zilliqa.xtext.scilla.Type
@@ -25,6 +32,7 @@ import org.butterflylabs.zilliqa.xtext.scilla.Uint256Type
 import org.butterflylabs.zilliqa.xtext.scilla.Uint32Type
 import org.butterflylabs.zilliqa.xtext.scilla.Uint64Type
 import org.butterflylabs.zilliqa.xtext.scilla.VariableDeclaration
+import org.butterflylabs.zilliqa.xtext.scilla.VariableTerm
 import org.butterflylabs.zilliqa.xtext.xsemantics.LambdaUtils
 import org.butterflylabs.zilliqa.xtext.xsemantics.TypeSubstitutions
 import org.eclipse.emf.ecore.util.EcoreUtil
@@ -261,4 +269,132 @@ auxiliary unify(TypeSubstitutions substitutions, ComplexType complexType, TypeVa
 {
     unify(substitutions, typeVar, complexType)
 }
+
+auxiliary unify(TypeSubstitutions substitutions, TypeVariable left, TypeVariable right)
+{
+    // unify both variables with a fresh new variable
+    val fresh = lambdaUtils.createFreshTypeVariable
+    substitutions.add(left.symbol.name, fresh)
+    substitutions.add(right.symbol.name, fresh)
+    fresh
+}
+
+auxiliary unify(TypeSubstitutions substitutions, TypeVariable v, ArrowType arrow)
+{
+    // occur check
+    notoccur(v, arrow)
+    substitutions.add(v.symbol.name, arrow)
+    EcoreUtil.copy(arrow)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, ArrowType arrow, TypeVariable v)
+{
+    unify(substitutions, v, arrow)
+}
+
+auxiliary unify(TypeSubstitutions substitutions, ArrowType arrow1, ArrowType arrow2)
+{
+    val newArrow1 = EcoreUtil.copy(arrow1)
+    val newArrow2 = EcoreUtil.copy(arrow2)
+    var result = unify(substitutions, arrow1.left, arrow2.left)
+    newArrow1.left = EcoreUtil.copy(result)
+    newArrow2.left = EcoreUtil.copy(result)
+    result = unify(substitutions, arrow1.right, arrow2.right)
+    newArrow1.right = EcoreUtil.copy(result)
+    newArrow2.right = EcoreUtil.copy(result)
+    newArrow1
+}
+
+auxiliary unify(TypeSubstitutions substitutions, ListType list1, ListType list2)
+{
+    val newList1 = EcoreUtil.copy(list1)
+    val newList2 = EcoreUtil.copy(list2)
+    var result = unify(substitutions, list1.parameter, list2.parameter)
+    newList1.parameter = EcoreUtil.copy(result)
+    newList2.parameter = EcoreUtil.copy(result)
+    newList1
+}
+
+auxiliary unify(TypeSubstitutions substitutions, OptionType option1, OptionType option2)
+{
+    val newOption1 = EcoreUtil.copy(option1)
+    val newOption2 = EcoreUtil.copy(option2)
+    var result = unify(substitutions, option1.parameter, option2.parameter)
+    newOption1.parameter = EcoreUtil.copy(result)
+    newOption2.parameter = EcoreUtil.copy(result)
+    newOption1
+}
+
+auxiliary unify(TypeSubstitutions substitutions, MapType map1, MapType map2)
+{
+    val newMap1 = EcoreUtil.copy(map1)
+    val newMap2 = EcoreUtil.copy(map2)
+    var result = unify(substitutions, map1.keyType, map2.keyType)
+    newMap1.keyType = EcoreUtil.copy(result)
+    newMap2.keyType = EcoreUtil.copy(result)
+    result = unify(substitutions, map1.valueType, map2.valueType)
+    newMap1.valueType = EcoreUtil.copy(result)
+    newMap2.valueType = EcoreUtil.copy(result)
+    newMap1
+}
+
+auxiliary unify(TypeSubstitutions substitutions, PairType pair1, PairType pair2)
+{
+    val newPair1 = EcoreUtil.copy(pair1)
+    val newPair2 = EcoreUtil.copy(pair2)
+    var result = unify(substitutions, pair1.leftType, pair2.leftType)
+    newPair1.leftType = EcoreUtil.copy(result)
+    newPair2.leftType = EcoreUtil.copy(result)
+    result = unify(substitutions, pair1.rightType, pair2.rightType)
+    newPair1.rightType = EcoreUtil.copy(result)
+    newPair2.rightType = EcoreUtil.copy(result)
+    newPair1
+}
+
+rule FunctionParameterType
+    G |~ FunctionParameter param : Type type
+	
+	from {
+    {
+        param.type !== null
+        type = EcoreUtil::copy(param.type)
+    }
+    or
+    type = lambdaUtils.createFreshTypeVariable 
+}
+
+// int literal fits in every in type because we don't check the length of the input data for now
+// int32 is the smallest and fits everywhere
+axiom IntConstantType
+    G |- TypeSubstitutions substitutions |> 
+        NumberDimensionless intLiteral : lambdaUtils.createInt32Type
+
+axiom StringConstantType
+    G |- TypeSubstitutions substitutions |> 
+        StringLiteral stringConstant : lambdaUtils.createStringType
+        
+axiom BlockNumberConstantType
+    G |- TypeSubstitutions substitutions |> 
+        BlockNumberConstant blockNumber : lambdaUtils.createBNumType
+        
+axiom AddressConstantType
+    G |- TypeSubstitutions substitutions |> 
+        AddressConstant address : lambdaUtils.createAddressType
+        
+axiom HashConstantType
+    G |- TypeSubstitutions substitutions |> 
+        HashConstant hash : lambdaUtils.createHashType
+
+axiom BoolConstantType
+    G |- TypeSubstitutions substitutions |> 
+        BoolConstant boolConstant : lambdaUtils.createBoolType
+
+rule VariableTermType
+    G |- TypeSubstitutions substitutions |> 
+        VariableTerm variableTerm : Type type
+from {
+    type = typesubstitution(substitutions, 
+        EcoreUtil::copy(env(G, variableTerm.variable.symbol.type, Type)))
+}
+
 

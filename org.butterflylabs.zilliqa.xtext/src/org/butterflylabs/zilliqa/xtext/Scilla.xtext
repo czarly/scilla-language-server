@@ -124,7 +124,7 @@ Function:
 ;
 
 FunctionParameter returns VariableDeclaration:
-	name=ID ":" type=Type
+	{FunctionParameter} name=ID ":" type=Type
 ;
 
 
@@ -324,8 +324,9 @@ MutableFieldKey:
 	|{MutableFieldKey} STRING
 ;
 
+// needs to be included in the semantics file
 BlockchainReadStatement returns VariableDeclaration:
-	name=ID "<-" "&" "BLOCKNUMBER"
+	name=ID "<-" "&" 'BLOCKNUMBER'
 ;
 
 StoreStatement:
@@ -360,45 +361,71 @@ SymbolRef:
 	symbol=[VariableDeclaration|ID]
 ;
 
-/// Literal
+/// Types
 
-Literal:
-	//SpecialVariables |
-    //BooleanConst |
-    Number |
-    StringLiteral
-;
+Uint32Type: {Uint32Type} "Uint32";
+Uint64Type: {Uint64Type} "Uint64";
+Uint128Type: {Uint128Type} "Uint128";
+Uint256Type: {Uint128Type} "Uint256";
 
-Number:
-    NumberDimensionless
-;
+Int32Type: {Int32Type} "Int32";
+Int64Type: {Int64Type} "Int64";
+Int128Type: {Int128Type} "Int128";
+Int256Type: {Int256Type} "Int256";
 
-NumberDimensionless:
-	(type=IntegerTypeEnum)?
-    value=INT
-;
+MessageType: {MessageType} "Message";
+StringType: {StringType} "String";
+HashType: {HashType} "ByStr32";
+AddressType: {AddressType} "ByStr20";
+BNumType: {BNumType} "BNum";
+PubKeyType: {PubKeyType} "ByStr33";
+BoolType: {BoolType} "Bool";
+NatType: {NatType} "Nat";
 
-StringLiteral:
-    value=STRING
-;
+ListType: "List" parameter=Type;
+OptionType: "Option" parameter=Type;
+PairType: "Pair" leftType=Type rightType=Type;
+MapType: "Map" keyType=Type valueType=Type;
 
 ElementaryType:
 	IntegerType | OtherType
 ;
 
-MapKeyType:
-	ElementaryType | "(" ElementaryType ")"
-;
+// limit the types that can be used as keys for the map. 
+// but type variables should still be accepted. so this rule was not sufficient.
+//MapKeyType:
+//	ElementaryType | "(" ElementaryType ")"
+//;
 
 IntegerType:
-	type=IntegerTypeEnum
+	Uint32Type
+	| Uint64Type
+	| Uint128Type
+	| Uint256Type
+	| Int32Type
+	| Int64Type
+	| Int128Type
+	| Int256Type
 ;
 
 OtherType:
-	type=ElementaryTypeEnum
+	MessageType 
+	| StringType
+	| HashType
+	| AddressType
+	| BNumType
+	| PubKeyType
+	| BoolType
+	| NatType
 ;
 
-/// Type
+ComplexType:
+	MapType
+	| OptionType
+	| ListType
+	| PairType
+;
+
 Type:
 	FunctionType
 ;
@@ -409,52 +436,57 @@ FunctionType returns Type:
 
 TerminalType returns Type:
 	'(' Type ')' 
-	| MessageType // can only stay here because the next rule is only disabled for input "Message" trough this rule
+	| ComplexType
 	| ElementaryType
 	| TypeVariable
-	| MapType
-	| DataType
 ;
 
-MapType:
-	"Map" key=Type value=Type
-;
-
-MessageType:
-	"Message"
-;
-
-// TODO: actually references a TypeVariableDeclaration
 TypeVariable:
 	symbol=[TypeVariableDeclaration|TYPEVARID]
+;  
+
+/// Literal
+
+Literal:
+    Number |
+    StringLiteral |
+    AddressConstant |
+    HashConstant |
+    BlockNumberConstant |
+    BoolConstant
 ;
 
-DataType:
-	"Bool"
-	| "Nat"
-	| "List" parameter=Type 
-	| "Option" parameter=Type
-	| "Pair" left=Type right=Type
+Number:
+    NumberDimensionless
 ;
 
-/*DataTypeEnum:
-	LIST="List" | SOME="Some" | NONE="None" | OPTION="Option"
-;*/
-
-/// Enums
-
-enum IntegerTypeEnum:
-	UINT32="Uint32" | UINT64="Uint64" | UINT128="Uint128" | UINT256="Uint256" | INT64="Int64" | INT32="Int32" | INT128="Int128" | INT256="Int256"
+NumberDimensionless:
+	(type=IntegerType)?
+    value=INT
 ;
 
-enum ElementaryTypeEnum:
-	MSG="Message" | STRING="String" | HASH="ByStr32" | ADDRESS="ByStr20" | BNUM="BNum" | PUBKEY="ByStr33"
+StringLiteral:
+    value=STRING
 ;
 
-// todo: replace with actual special variables    
-/*enum SpecialVariablesTypeEnum:
-	MSG="msg"|BLOCK="block"|TX="tx"
-;*/    
+BlockNumberConstant:
+	value=BNUM
+;
+
+AddressConstant:
+	value=ADDRESS
+;
+
+HashConstant:
+	value=HASH
+;
+
+BoolConstant:
+	{BoolConstant}
+	value=BOOL
+;
+
+/// Buildin
    
 enum BuiltinFunctionEnum:
 	ADD="builtin add" 
@@ -490,13 +522,23 @@ enum BuiltinFunctionEnum:
     
 /// buildins
 
+terminal BOOL: "true" | "false";
+terminal CHAR: ('a'..'z'|'A'..'Z'|'0'..'9');
+terminal BNUM: 'block' INT;
+// 64 chars, bystr32
+terminal HASH: '0x' CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR;
+// 40 chars, bystr20 
+terminal ADDRESS: '0x' CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR;
+
 terminal ID: '^'?('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 terminal TYPEVARID: "'" ID;
 terminal INT returns ecore::EInt: ('0'..'9')+;
+
 terminal STRING:
 			'"' ( '\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\'|'"') )* '"' 
 			//| "'" ( '\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\'|"'") )* "'"
 		;
+				
 terminal SL_COMMENT	: '(*' !('\n'|'\r')* '*)';
 // terminal SL_COMMENT : '//' !('\n'|'\r')* ('\r'? '\n')?;
 

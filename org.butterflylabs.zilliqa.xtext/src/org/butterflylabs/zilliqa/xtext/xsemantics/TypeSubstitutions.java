@@ -7,12 +7,9 @@ import java.util.Set;
 
 import org.butterflylabs.zilliqa.xtext.scilla.Type;
 
-/**
- * @author bettini
- * 
- */
 public class TypeSubstitutions {
 
+	LambdaUtils lambdaUtils = new LambdaUtils();
 	protected Map<String, Type> substitutions = new HashMap<String, Type>();
 
 	public void reset() {

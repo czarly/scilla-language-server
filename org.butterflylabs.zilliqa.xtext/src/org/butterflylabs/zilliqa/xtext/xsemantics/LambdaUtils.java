@@ -4,7 +4,7 @@ import org.butterflylabs.zilliqa.xtext.scilla.AddressType;
 import org.butterflylabs.zilliqa.xtext.scilla.ArrowType;
 import org.butterflylabs.zilliqa.xtext.scilla.BNumType;
 import org.butterflylabs.zilliqa.xtext.scilla.BoolType;
-import org.butterflylabs.zilliqa.xtext.scilla.ElementaryType;
+//import org.butterflylabs.zilliqa.xtext.scilla.ElementaryType;
 import org.butterflylabs.zilliqa.xtext.scilla.HashType;
 import org.butterflylabs.zilliqa.xtext.scilla.Int128Type;
 import org.butterflylabs.zilliqa.xtext.scilla.Int256Type;
@@ -91,7 +91,7 @@ public class LambdaUtils {
 		PairType pairType = ScillaFactory.eINSTANCE.createPairType();
 		pairType.setLeftType(left);
 		pairType.setRightType(right);
-		return pairType;
+		return pairType; 
 	}
 	
 	public MapType createMapType(Type key, Type value) {
