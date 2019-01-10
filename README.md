@@ -2,6 +2,8 @@
 
 A analysis server for the smart contract language Scilla following the **language server protocol**.
 
+[https://czarly.github.io/scilla-language-server/](https://czarly.github.io/scilla-language-server/)
+
 # Features
 
 The implementation is based on [**Xtext**](https://www.eclipse.org/Xtext/) which is a Eclipse project for building tool support for DSL. Therefore running the language server and the **Visual Studio Code** plugin requires Java to be installed on the machine. The planned features include what is provided by the **Xtext** language server implementation:
