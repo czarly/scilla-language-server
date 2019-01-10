@@ -274,6 +274,23 @@
 	</build>
 	<repositories>
 		<repository>
+			<!-- we also need this one because this is an eclipse project, so it needs to
+				resolve xsemantics runtime dependencies from the p2 repository -->
+			<id>Xsemantics</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/xsemantics/milestones/</url>
+		</repository>
+		<repository>
+			<id>eclipse</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/releases/oxygen</url>
+		</repository>
+		<repository>
+			<id>Xtext Update Site</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/${xtextVersion}</url>
+		</repository>
+		<repository>
 			<id>codehaus-snapshots</id>
 			<name>disable dead 'Codehaus Snapshots' repository, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481478</name>
 			<url>http://nexus.codehaus.org/snapshots/</url>
