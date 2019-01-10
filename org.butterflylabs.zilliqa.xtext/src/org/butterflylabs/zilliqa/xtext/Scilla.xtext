@@ -93,13 +93,6 @@ Expression:
 
 SimpleExpression:
 	TypeFunction
-	| Function
-	| BuiltinApplication
-	| TypeApplication
-	| Constructor
-	| EmptyMap
-	| MessageExpression
-	| MatchExpression
 	| Term
 ;
 
@@ -274,18 +267,25 @@ Application returns Term:
 ;
 
 TerminalTerm returns Term:
-    '(' Term ')' |
-    Literal |
-    VariableTerm 
+    '(' Term ')'
+    | Function
+	| BuiltinApplication
+	| TypeApplication
+	| Constructor
+	| EmptyMap
+	| MessageExpression
+	| MatchExpression
+    | Literal
+    | VariableTerm 
 ;
 
 VariableTerm:
 	variable=SymbolRef
 ;
 
-Variable:
+/*Variable:
 	name=ID
-;
+;*/
 
 
 /// Statements

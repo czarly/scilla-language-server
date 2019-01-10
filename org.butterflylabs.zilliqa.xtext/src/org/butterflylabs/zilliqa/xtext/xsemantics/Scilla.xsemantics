@@ -1,5 +1,6 @@
 import org.butterflylabs.zilliqa.xtext.scilla.AddressConstant
 import org.butterflylabs.zilliqa.xtext.scilla.AddressType
+import org.butterflylabs.zilliqa.xtext.scilla.Application
 import org.butterflylabs.zilliqa.xtext.scilla.ArrowType
 import org.butterflylabs.zilliqa.xtext.scilla.BNumType
 import org.butterflylabs.zilliqa.xtext.scilla.BlockNumberConstant
@@ -397,4 +398,15 @@ from {
         EcoreUtil::copy(env(G, variableTerm.variable.symbol.type, Type)))
 }
 
+// functions
 
+rule ApplicationType
+    G |- TypeSubstitutions substitutions |> Application application : ArrowType type
+from {
+    G |~ application.fun : var Type paramType
+    G, function.variable <- paramType |- 
+        substitutions |> function.body : var Type termType
+    paramType = typesubstitution(substitutions, paramType)
+    termType = typesubstitution(substitutions, termType)
+    type = lambdaUtils.createArrowType(paramType, termType)
+}
