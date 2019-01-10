@@ -1,6 +1,5 @@
 import org.butterflylabs.zilliqa.xtext.scilla.AddressConstant
 import org.butterflylabs.zilliqa.xtext.scilla.AddressType
-import org.butterflylabs.zilliqa.xtext.scilla.Application
 import org.butterflylabs.zilliqa.xtext.scilla.ArrowType
 import org.butterflylabs.zilliqa.xtext.scilla.BNumType
 import org.butterflylabs.zilliqa.xtext.scilla.BlockNumberConstant
@@ -8,6 +7,9 @@ import org.butterflylabs.zilliqa.xtext.scilla.BoolConstant
 import org.butterflylabs.zilliqa.xtext.scilla.BoolType
 import org.butterflylabs.zilliqa.xtext.scilla.ComplexType
 import org.butterflylabs.zilliqa.xtext.scilla.ElementaryType
+import org.butterflylabs.zilliqa.xtext.scilla.EmptyMap
+import org.butterflylabs.zilliqa.xtext.scilla.Expression
+import org.butterflylabs.zilliqa.xtext.scilla.Function
 import org.butterflylabs.zilliqa.xtext.scilla.FunctionParameter
 import org.butterflylabs.zilliqa.xtext.scilla.HashConstant
 import org.butterflylabs.zilliqa.xtext.scilla.HashType
@@ -16,13 +18,21 @@ import org.butterflylabs.zilliqa.xtext.scilla.Int256Type
 import org.butterflylabs.zilliqa.xtext.scilla.Int32Type
 import org.butterflylabs.zilliqa.xtext.scilla.Int64Type
 import org.butterflylabs.zilliqa.xtext.scilla.ListType
+import org.butterflylabs.zilliqa.xtext.scilla.LocalBinding
 import org.butterflylabs.zilliqa.xtext.scilla.MapType
+import org.butterflylabs.zilliqa.xtext.scilla.MessageExpression
 import org.butterflylabs.zilliqa.xtext.scilla.MessageType
 import org.butterflylabs.zilliqa.xtext.scilla.NatType
+import org.butterflylabs.zilliqa.xtext.scilla.NewBool
+import org.butterflylabs.zilliqa.xtext.scilla.NewList
+import org.butterflylabs.zilliqa.xtext.scilla.NewNat
+import org.butterflylabs.zilliqa.xtext.scilla.NewOption
+import org.butterflylabs.zilliqa.xtext.scilla.NewPair
 import org.butterflylabs.zilliqa.xtext.scilla.NumberDimensionless
 import org.butterflylabs.zilliqa.xtext.scilla.OptionType
 import org.butterflylabs.zilliqa.xtext.scilla.PairType
 import org.butterflylabs.zilliqa.xtext.scilla.PubKeyType
+import org.butterflylabs.zilliqa.xtext.scilla.ScillaFactory
 import org.butterflylabs.zilliqa.xtext.scilla.StringLiteral
 import org.butterflylabs.zilliqa.xtext.scilla.StringType
 import org.butterflylabs.zilliqa.xtext.scilla.Term
@@ -55,8 +65,9 @@ auxiliary {
 }
 
 judgments {
-    type |- TypeSubstitutions substitutions |> Term term : output Type
-    paramtype |~ VariableDeclaration param : output Type
+    termType |- TypeSubstitutions substitutions |> Term term : output Type
+    paramType |~ VariableDeclaration param : output Type
+    expressionType |- Expression expression : output Type
 }
 
 // notoccur
@@ -398,15 +409,73 @@ from {
         EcoreUtil::copy(env(G, variableTerm.variable.symbol.type, Type)))
 }
 
-// functions
+// Expressions <- more general than terms.
 
-rule ApplicationType
-    G |- TypeSubstitutions substitutions |> Application application : ArrowType type
+rule NewListType
+	G |- NewList newList : ListType type
 from {
-    G |~ application.fun : var Type paramType
-    G, function.variable <- paramType |- 
-        substitutions |> function.body : var Type termType
-    paramType = typesubstitution(substitutions, paramType)
-    termType = typesubstitution(substitutions, termType)
-    type = lambdaUtils.createArrowType(paramType, termType)
+	val listType = ScillaFactory.eINSTANCE.createListType();
+	listType.setParameter(newList.type);
+	type = listType
+}
+
+rule MessageExpressionType
+	G |- MessageExpression message : MessageType type
+from {
+	type = ScillaFactory.eINSTANCE.createMessageType();
+}
+
+rule FunctionType
+	G |- Function function : ArrowType type
+from {
+	var Type expressionType
+	G |- function.body : expressionType
+	val arrowType = ScillaFactory.eINSTANCE.createArrowType();
+	arrowType.setLeft(function.variable.type);
+	arrowType.setRight(expressionType);
+}
+
+rule NewOptionType
+	G |- NewOption newOption : OptionType type
+from {
+	val optionType = ScillaFactory.eINSTANCE.createOptionType();
+	optionType.setParameter(newOption.type);
+	type = optionType
+}
+
+rule NewPairType
+	G |- NewPair newPair : PairType type
+from {
+	val pairType = ScillaFactory.eINSTANCE.createPairType();
+	pairType.setLeftType(newPair.left);
+	pairType.setLeftType(newPair.right);
+	type = pairType
+}
+
+rule EmptyMapType
+	G |- EmptyMap emptyMap : MapType type
+from {
+	val mapType = ScillaFactory.eINSTANCE.createMapType();
+	mapType.setKeyType(emptyMap.key);
+	mapType.setValueType(emptyMap.value);
+	type = mapType
+}
+
+
+rule NewNat
+	G |- NewNat newNat : NatType type
+from {
+	type = ScillaFactory.eINSTANCE.createNatType();
+}
+
+rule NewBool
+	G |- NewBool newBool : BoolType type
+from {
+	type = ScillaFactory.eINSTANCE.createBoolType();
+}
+
+rule LocalBindingType
+	G |- LocalBinding binding : Type type
+from {
+	G |- binding.body : type
 }

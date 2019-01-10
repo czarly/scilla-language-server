@@ -7,7 +7,7 @@ import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 
 Scilla:
 	{Scilla}
-	('scilla_version' '1')?
+	('scilla_version' version=INT)?
 	('import' (imports+=Import)*)?
 	library=Library
 	contract=Contract?
@@ -93,6 +93,12 @@ Expression:
 
 SimpleExpression:
 	TypeFunction
+	| Function
+	| BuiltinApplication
+	| TypeApplication
+	| Constructor
+	| MessageExpression
+	| MatchExpression
 	| Term
 ;
 
@@ -222,6 +228,7 @@ Constructor:
 	| NewOption
 	| NewBool
 	| NewNat
+	| EmptyMap
 ;
 
 NewNat:
@@ -230,6 +237,7 @@ NewNat:
 ;
 
 NewBool:
+	{NewBool}
 	"True" 
 	| "False"
 ;
@@ -267,16 +275,9 @@ Application returns Term:
 ;
 
 TerminalTerm returns Term:
-    '(' Term ')'
-    | Function
-	| BuiltinApplication
-	| TypeApplication
-	| Constructor
-	| EmptyMap
-	| MessageExpression
-	| MatchExpression
-    | Literal
-    | VariableTerm 
+    '(' Term ')' |
+    Literal |
+    VariableTerm 
 ;
 
 VariableTerm:
@@ -522,6 +523,7 @@ enum BuiltinFunctionEnum:
     
 /// buildins
 
+terminal INT returns ecore::EInt: ('0'..'9')+;
 terminal BOOL: "true" | "false";
 terminal CHAR: ('a'..'z'|'A'..'Z'|'0'..'9');
 terminal BNUM: 'block' INT;
@@ -532,7 +534,6 @@ terminal ADDRESS: '0x' CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CHAR CH
 
 terminal ID: '^'?('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 terminal TYPEVARID: "'" ID;
-terminal INT returns ecore::EInt: ('0'..'9')+;
 
 terminal STRING:
 			'"' ( '\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\'|'"') )* '"' 
